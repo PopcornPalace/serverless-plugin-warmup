@@ -12,6 +12,8 @@
 const BbPromise = require('bluebird')
 const fs = BbPromise.promisifyAll(require('fs-extra'))
 const path = require('path')
+var AdmZip = require('adm-zip');
+
 
 /**
  * @classdesc Keep your lambdas warm during Winter
@@ -91,8 +93,8 @@ class WarmUP {
       this.folderName = this.custom.warmup.folderName
     }
     this.pathFolder = this.getPath(this.folderName)
-    this.pathFile = this.pathFolder + '/index.js'
-    this.pathHandler = this.folderName + '/index.warmUp'
+    this.pathFile = 'warmup.js'
+    this.pathHandler = 'warmup.warmUp'
 
     /** Default options */
     this.warmup = {
@@ -263,8 +265,10 @@ module.exports.warmUp = (event, context, callback) => {
   });
 }`
 
-    /** Write warm up file */
-    return fs.outputFileAsync(this.pathFile, warmUpFunction)
+      var zip = new AdmZip();
+      zip.addFile(this.pathFile, new Buffer(warmUpFunction), "warmup function");
+    	zip.writeZip("./warmup.zip");
+      return Promise.resolve();
   }
 
   /**
@@ -282,9 +286,7 @@ module.exports.warmUp = (event, context, callback) => {
       name: this.warmup.name,
       runtime: 'nodejs6.10',
       package: {
-        individually: true,
-        exclude: ['**'],
-        include: [this.folderName + '/**']
+        artifact: "./warmup.zip"
       },
       timeout: this.warmup.timeout
     }
