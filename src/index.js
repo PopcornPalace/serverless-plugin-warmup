@@ -284,7 +284,7 @@ module.exports.warmUp = (event, context, callback) => {
       handler: this.pathHandler,
       memorySize: this.warmup.memorySize,
       name: this.warmup.name,
-      runtime: 'nodejs8.10',
+      runtime: 'nodejs12.x',
       package: {
         artifact: "./warmup.zip"
       },
